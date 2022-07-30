@@ -78,10 +78,18 @@ class Thing(Enum):
     LOCK = auto()
     PLUG = auto()
     SWITCH = auto()
-    TEMPERATURE = auto()  # Control desired high and low temperatures
+    #TEMPERATURE = auto()  # Control desired high and low temperatures
     HEAT = auto()  # Control desired low temperature
     AIR_CONDITIONING = auto()  # Control desired high temperature
+    WARM_WATER = auto()
 
+@unique
+class LightTemperature(Enum):
+    """
+    KeyWords for light temperature
+    """
+    WARM = auto()
+    COLD = auto()
 
 @unique
 class Attribute(Enum):
@@ -139,6 +147,29 @@ class Action(Enum):
     LOCATE = auto()
     LOCK = auto()
     UNLOCK = auto()
+
+@unique
+class Location(Enum):
+    """
+    This class represents 'Locations' where you can find THINGS or ENTITIES
+    """
+    BACK_BALCONY    = auto()
+    BACKYARD        = auto()
+    BATHROOM        = auto()
+    BEDROOM         = auto()
+    CORRIDOR        = auto()
+    ENTRYWAY        = auto()
+    FRONT_BALCONY   = auto()
+    FRONT_YARD      = auto()
+    GARAGE          = auto()
+    KIDS_ROOM       = auto()
+    KITCHEN         = auto()
+    LIVING_ROOM     = auto()
+    OFFICE          = auto()
+    STAIRS          = auto()
+    UPPER_BATHROOM  = auto()
+    UPPER_CORRIDOR  = auto()
+    WARDROBE        = auto()
 
 
 @total_ordering
@@ -222,10 +253,12 @@ class IoTRequest:
                  action: Action,
                  thing: Thing = None,
                  attribute: Attribute = None,
+                 location: Location = None,
                  entity: str = None,
                  scene: str = None,
                  value: int = None,
-                 state: State = None):
+                 state: State = None,
+                 description: list = None):
 
         if not thing and not entity and not scene:
             raise Exception("At least one of thing,"
@@ -234,20 +267,24 @@ class IoTRequest:
         self.action = action
         self.thing = thing
         self.attribute = attribute
+        self.location = location
         self.entity = entity
         self.scene = scene
         self.value = value
         self.state = state
+        self.description = description
 
     def __repr__(self):
         template = ('IoTRequest('
                     'action={action},'
                     ' thing={thing},'
                     ' attribute={attribute},'
+                    ' location={location},'
                     ' entity={entity},'
                     ' scene={scene},'
                     ' value={value},'
                     ' state={state}'
+                    ' description={description}'
                     ')')
         entity = '"{}"'.format(self.entity) if self.entity else None
         scene = '"{}"'.format(self.scene) if self.scene else None
@@ -256,10 +293,12 @@ class IoTRequest:
             action=self.action,
             thing=self.thing,
             attribute=self.attribute,
+            location=self.location,
             entity=entity,
             scene=scene,
             value=value,
-            state=self.state
+            state=self.state,
+            description = self.description
         )
 
     @property
@@ -275,10 +314,12 @@ class IoTRequest:
             'action': self.action.name,
             'thing': self.thing.name if self.thing else None,
             'attribute': self.attribute.name if self.attribute else None,
+            'location': self.location.name if self.location else None,
             'entity': self.entity,
             'scene': self.scene,
             'value': self.value,
-            'state': self.state.name if self.state else None
+            'state': self.state.name if self.state else None,
+            'description' : self.description if self.description else None,
         }
 
     @classmethod
@@ -289,6 +330,8 @@ class IoTRequest:
             data['thing'] = Thing[data['thing']]
         if data.get('attribute') not in (None, ''):
             data['attribute'] = Attribute[data['attribute']]
+        if data.get('location') not in (None, ''):
+            data['location'] = Location[data['location']]
         if data.get('state') not in (None, ''):
             data['state'] = State[data['state']]
 
@@ -528,8 +571,8 @@ class CommonIoTSkill(MycroftSkill, ABC):
         An IoTRequest contains several properties (see the
         documentation for that class). This method should return
         True if and only if this skill can take the appropriate
-        'action' when considering all other properties
-        of the request. In other words, a partial match, one in which
+        'action' when considering _all other properties
+        of the request_. In other words, a partial match, one in which
         any piece of the IoTRequest is not known to this skill,
         and is not None, this should return (False, None).
 
