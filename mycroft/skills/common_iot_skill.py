@@ -75,6 +75,7 @@ class Thing(Enum):
     LIGHT = auto()
     THERMOSTAT = auto()
     DOOR = auto()
+    WINDOW = auto()
     LOCK = auto()
     PLUG = auto()
     SWITCH = auto()
@@ -124,6 +125,8 @@ class State(Enum):
     UNLOCKED = auto()
     OCCUPIED = auto()
     UNOCCUPIED = auto()
+    OPENED  = auto()
+    CLOSED  = auto()
 
 
 @unique
