@@ -80,7 +80,7 @@ class Thing(Enum):
     SWITCH = auto()
     #TEMPERATURE = auto()  # Control desired high and low temperatures
     HEAT = auto()  # Control desired low temperature
-    AIR_CONDITIONING = auto()  # Control desired high temperature
+    AIR_CONDITIONING = auto()  # Control desired high temperature   
     WARM_WATER = auto()
 
 @unique
